@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOKEN CLASH — Competitive Block Battler</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ SCREENS ══════════════════ -->
+
+<!-- TITLE SCREEN -->
+<div id="screen-title" class="screen active">
+  <div class="title-bg"></div>
+  <div class="title-particles" id="titleParticles"></div>
+  <div class="title-content">
+    <div class="logo-wrap">
+      <div class="logo-sub">COMPETITIVE BLOCK BATTLER</div>
+      <h1 class="logo">TOKEN<span>CLASH</span></h1>
+      <div class="logo-tag">⟡ CRYPTO-POWERED PvP ⟡</div>
+    </div>
+    <div class="menu-buttons">
+      <button class="btn btn-primary" onclick="UI.startLocalPvP()">⚔ LOCAL PvP</button>
+      <button class="btn btn-secondary" onclick="UI.startSolo()">🤖 VS BOT</button>
+      <button class="btn btn-ghost" onclick="UI.showHelp()">📖 HOW TO PLAY</button>
+    </div>
+    <div class="title-credits">Arrow Keys / WASD · Z to Rotate · Space to Hard Drop</div>
+  </div>
+  <div class="ticker-wrap"><div class="ticker" id="priceTicker"></div></div>
+</div>
+
+<!-- HELP SCREEN -->
+<div id="screen-help" class="screen">
+  <div class="help-inner">
+    <h2>HOW TO PLAY</h2>
+    <div class="help-grid">
+      <div class="help-card">
+        <h3>🎮 Controls</h3>
+        <p><strong>Player 1:</strong> WASD + Z rotate + S drop</p>
+        <p><strong>Player 2:</strong> ← → ↑ ↓ + / rotate + ↓ drop</p>
+      </div>
+      <div class="help-card">
+        <h3>🧩 Matching</h3>
+        <p>Clear <strong>full horizontal lines</strong> to score and send garbage to your opponent.</p>
+        <p>Match <strong>4+ same-token clusters</strong> for chain explosions and bonus damage!</p>
+      </div>
+      <div class="help-card">
+        <h3>📈 Live Prices</h3>
+        <p><strong>Pumping tokens</strong> fall faster and give bonus points.</p>
+        <p><strong>Volatile tokens</strong> become wild blocks — trigger bigger explosions!</p>
+      </div>
+      <div class="help-card">
+        <h3>⚔ Attacks</h3>
+        <p><strong>1 line clear</strong> → no attack</p>
+        <p><strong>2 lines</strong> → send 1 garbage row</p>
+        <p><strong>3 lines</strong> → send 2 garbage rows</p>
+        <p><strong>4 lines (CLASH!)</strong> → send 4 garbage rows 💥</p>
+        <p><strong>Cluster bomb</strong> → send 3 garbage rows 💣</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="UI.showTitle()">← BACK</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <!-- Live price bar -->
+  <div class="price-bar" id="priceBar"></div>
+
+  <div class="game-arena">
+    <!-- P1 panel -->
+    <div class="player-panel" id="panel-p1">
+      <div class="player-header">
+        <span class="player-tag p1-tag">◀ P1</span>
+        <span class="player-name" id="p1name">PLAYER 1</span>
+      </div>
+      <div class="side-info">
+        <div class="info-box">
+          <div class="info-label">SCORE</div>
+          <div class="info-val" id="p1score">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LEVEL</div>
+          <div class="info-val" id="p1level">1</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LINES</div>
+          <div class="info-val" id="p1lines">0</div>
+        </div>
+      </div>
+      <div class="next-label">NEXT</div>
+      <canvas id="p1next" width="120" height="120"></canvas>
+      <div class="hold-label">HOLD</div>
+      <canvas id="p1hold" width="120" height="120"></canvas>
+      <div class="attack-meter" id="p1meter">
+        <div class="meter-label">ATTACK</div>
+        <div class="meter-bar"><div class="meter-fill" id="p1meterFill"></div></div>
+      </div>
+      <div class="garbage-queue" id="p1garbage"></div>
+    </div>
+
+    <!-- P1 board -->
+    <div class="board-wrap" id="boardwrap-p1">
+      <canvas id="p1board" width="300" height="600"></canvas>
+      <div class="board-overlay" id="p1overlay"></div>
+    </div>
+
+    <!-- Centre divider -->
+    <div class="divider">
+      <div class="divider-text">VS</div>
+      <div class="timer-box">
+        <div class="timer-label">TIME</div>
+        <div class="timer-val" id="gameTimer">3:00</div>
+      </div>
+      <div class="divider-effects" id="dividerFx"></div>
+    </div>
+
+    <!-- P2 board -->
+    <div class="board-wrap" id="boardwrap-p2">
+      <canvas id="p2board" width="300" height="600"></canvas>
+      <div class="board-overlay" id="p2overlay"></div>
+    </div>
+
+    <!-- P2 panel -->
+    <div class="player-panel" id="panel-p2">
+      <div class="player-header">
+        <span class="player-name" id="p2name">PLAYER 2</span>
+        <span class="player-tag p2-tag">P2 ▶</span>
+      </div>
+      <div class="side-info">
+        <div class="info-box">
+          <div class="info-label">SCORE</div>
+          <div class="info-val" id="p2score">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LEVEL</div>
+          <div class="info-val" id="p2level">1</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LINES</div>
+          <div class="info-val" id="p2lines">0</div>
+        </div>
+      </div>
+      <div class="next-label">NEXT</div>
+      <canvas id="p2next" width="120" height="120"></canvas>
+      <div class="hold-label">HOLD</div>
+      <canvas id="p2hold" width="120" height="120"></canvas>
+      <div class="attack-meter" id="p2meter">
+        <div class="meter-label">ATTACK</div>
+        <div class="meter-bar"><div class="meter-fill" id="p2meterFill"></div></div>
+      </div>
+      <div class="garbage-queue" id="p2garbage"></div>
+    </div>
+  </div>
+
+  <button class="btn-pause" id="btnPause" onclick="GameManager.togglePause()">⏸</button>
+</div>
+
+<!-- GAME OVER SCREEN -->
+<div id="screen-gameover" class="screen">
+  <div class="gameover-inner">
+    <div class="gameover-badge" id="goBadge">💥</div>
+    <h2 class="gameover-title" id="goTitle">GAME OVER</h2>
+    <div class="gameover-winner" id="goWinner"></div>
+    <div class="gameover-stats" id="goStats"></div>
+    <div class="gameover-buttons">
+      <button class="btn btn-primary" onclick="GameManager.restart()">⚔ REMATCH</button>
+      <button class="btn btn-ghost" onclick="UI.showTitle()">🏠 MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAUSE SCREEN -->
+<div id="screen-pause" class="screen">
+  <div class="pause-inner">
+    <h2>PAUSED</h2>
+    <button class="btn btn-primary" onclick="GameManager.togglePause()">▶ RESUME</button>
+    <button class="btn btn-secondary" onclick="GameManager.restart()">↺ RESTART</button>
+    <button class="btn btn-ghost" onclick="UI.showTitle()">🏠 MENU</button>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="js/tokens.js"></script>
+<script src="js/pieces.js"></script>
+<script src="js/board.js"></script>
+<script src="js/player.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/prices.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
